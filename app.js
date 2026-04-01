@@ -1,6 +1,7 @@
 const DB_NAME = "humnote-db";
 const STORE_NAME = "melodyNotes";
 const DB_VERSION = 1;
+const APP_VERSION = "0.1.0";
 const MIN_RECORDING_MS = 700;
 const MAX_LIVE_NOTES = 18;
 const MIN_PITCH_HZ = 45;
@@ -17,7 +18,7 @@ const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "
 
 const els = {
   installButton: document.getElementById("install-button"),
-  installHint: document.getElementById("install-hint"),
+  appVersion: document.getElementById("app-version"),
   statusPill: document.getElementById("status-pill"),
   liveNote: document.getElementById("live-note"),
   liveFrequency: document.getElementById("live-frequency"),
@@ -65,6 +66,7 @@ init().catch((error) => {
 });
 
 async function init() {
+  els.appVersion.textContent = `HumNote v${APP_VERSION}`;
   state.db = await openDatabase();
   state.entries = await getAllEntries(state.db);
   renderLibrary();
@@ -81,7 +83,6 @@ function wireEvents() {
     event.preventDefault();
     state.deferredInstallPrompt = event;
     els.installButton.hidden = false;
-    els.installHint.textContent = "Install HumNote for full-screen launch and faster access.";
   });
 
   els.installButton.addEventListener("click", async () => {
@@ -355,7 +356,9 @@ function renderLivePhrase(notes) {
 }
 
 function updateDraftSummary() {
-  const noteLabels = state.currentMelody.map((item) => item.note).join(" - ");
+  const noteLabels = state.currentMelody
+    .map((item) => (item.type === "rest" ? `rest ${formatDurationBadge(item.durationMs)}` : item.note))
+    .join(" - ");
   if (noteLabels) {
     els.draftSummary.textContent = `Draft melody: ${noteLabels}. Saving it to your melody inbox now.`;
   } else {
@@ -379,7 +382,12 @@ async function saveCurrentTake() {
     melody: state.currentMelody,
     durationMs: state.currentDurationMs,
     clip: state.currentBlob,
-    searchText: [title, tags.join(" "), els.notesInput.value.trim(), state.currentMelody.map((item) => item.note).join(" ")]
+    searchText: [
+      title,
+      tags.join(" "),
+      els.notesInput.value.trim(),
+      state.currentMelody.map((item) => (item.type === "rest" ? "rest" : item.note)).join(" ")
+    ]
       .join(" ")
       .toLowerCase()
   };
@@ -510,6 +518,11 @@ async function playMelody(melody) {
 
   let cursor = context.currentTime + 0.02;
   melody.forEach((item) => {
+    if (item.type === "rest") {
+      cursor += Math.max(0.12, item.durationMs / 1000);
+      return;
+    }
+
     const oscillator = context.createOscillator();
     oscillator.type = "triangle";
     oscillator.frequency.value = noteNumberToFrequency(item.midi);
@@ -553,26 +566,41 @@ function summariseMelody(frames) {
     return [];
   }
 
-  const notes = [];
+  const phrase = [];
   let current = null;
   let previousTime = frames[0].time;
+  const frameSpan = estimatedFrameSpan(frames);
 
   for (const frame of frames) {
     const gapMs = frame.time - previousTime;
 
+    if (current && gapMs > MAX_NOTE_GAP_MS) {
+      current.durationMs = Math.max(MIN_NOTE_DURATION_MS, previousTime - current.startedAt + frameSpan);
+      if (current.durationMs >= MIN_NOTE_DURATION_MS) {
+        phrase.push(current);
+      }
+
+      phrase.push({
+        type: "rest",
+        durationMs: gapMs - frameSpan
+      });
+
+      current = null;
+    }
+
     if (
       !current ||
-      current.note !== frame.note.label ||
-      gapMs > MAX_NOTE_GAP_MS
+      current.note !== frame.note.label
     ) {
       if (current) {
-        current.durationMs = Math.max(MIN_NOTE_DURATION_MS, previousTime - current.startedAt + estimatedFrameSpan(frames));
+        current.durationMs = Math.max(MIN_NOTE_DURATION_MS, previousTime - current.startedAt + frameSpan);
         if (current.durationMs >= MIN_NOTE_DURATION_MS) {
-          notes.push(current);
+          phrase.push(current);
         }
       }
 
       current = {
+        type: "note",
         note: frame.note.label,
         midi: frame.note.midi,
         startedAt: frame.time,
@@ -584,16 +612,33 @@ function summariseMelody(frames) {
   }
 
   if (current) {
-    current.durationMs = Math.max(MIN_NOTE_DURATION_MS, previousTime - current.startedAt + estimatedFrameSpan(frames));
-    notes.push(current);
+    current.durationMs = Math.max(MIN_NOTE_DURATION_MS, previousTime - current.startedAt + frameSpan);
+    phrase.push(current);
   }
 
   return smoothMelody(
-    notes
-      .filter((item) => item.durationMs >= MIN_NOTE_DURATION_MS)
+    phrase
+      .filter((item) => item.type === "rest" || item.durationMs >= MIN_NOTE_DURATION_MS)
       .reduce((accumulator, item) => {
+      if (item.type === "rest") {
+        if (item.durationMs >= 80) {
+          const previous = accumulator.at(-1);
+          if (previous?.type === "rest") {
+            previous.durationMs += item.durationMs;
+          } else {
+            accumulator.push({ ...item });
+          }
+        }
+        return accumulator;
+      }
+
       const previous = accumulator.at(-1);
-      if (previous && previous.note === item.note && item.startedAt - (previous.startedAt + previous.durationMs) <= MAX_NOTE_GAP_MS) {
+      if (
+        previous &&
+        previous.type === "note" &&
+        previous.note === item.note &&
+        item.startedAt - (previous.startedAt + previous.durationMs) <= MAX_NOTE_GAP_MS
+      ) {
         previous.durationMs += item.durationMs;
       } else {
         accumulator.push(item);
@@ -634,7 +679,21 @@ function smoothMelody(notes) {
 
   for (const note of notes) {
     const previous = smoothed.at(-1);
+    if (note.type === "rest") {
+      if (previous?.type === "rest") {
+        previous.durationMs += note.durationMs;
+      } else {
+        smoothed.push({ ...note });
+      }
+      continue;
+    }
+
     if (!previous) {
+      smoothed.push({ ...note });
+      continue;
+    }
+
+    if (previous.type === "rest") {
       smoothed.push({ ...note });
       continue;
     }
@@ -662,6 +721,9 @@ function smoothMelody(notes) {
     const previous = smoothed[index - 1];
     const current = smoothed[index];
     const next = smoothed[index + 1];
+    if (previous.type !== "note" || current.type !== "note" || next.type !== "note") {
+      continue;
+    }
     const isShortBridge = current.durationMs <= 240;
     const neighborsMatch = previous.midi === next.midi;
 
@@ -893,13 +955,13 @@ function renderDurationMelody(container, melody) {
 
   melody.forEach((item) => {
     const pill = document.createElement("span");
-    pill.className = "chip duration-chip";
-    pill.textContent = item.note;
+    pill.className = `chip duration-chip ${item.type === "rest" ? "rest-chip" : ""}`;
+    pill.textContent = item.type === "rest" ? "Rest" : item.note;
 
     const flexGrow = Math.max(1, item.durationMs / maxDuration * 3.4);
     pill.style.flexGrow = String(flexGrow);
     pill.style.setProperty("--duration-fill", `${Math.max(18, Math.min(100, item.durationMs / maxDuration * 100))}%`);
-    pill.title = `${item.note} - ${Math.round(item.durationMs)} ms`;
+    pill.title = `${item.type === "rest" ? "Rest" : item.note} - ${Math.round(item.durationMs)} ms`;
 
     const length = document.createElement("span");
     length.className = "duration-label";

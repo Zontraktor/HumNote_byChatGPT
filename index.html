@@ -15,17 +15,13 @@
 
     <main class="app-shell">
       <section class="hero">
-        <p class="eyebrow">HumNote</p>
-        <h1>Capture melody ideas before they disappear.</h1>
-        <p class="hero-copy">
-          Hum, whistle, or sing into your phone. HumNote records the audio, sketches the notes, and keeps each melody idea in a searchable inbox.
-        </p>
+        <div class="hero-topline">
+          <p id="app-version" class="eyebrow">HumNote</p>
+          <button id="record-button" class="record-button hero-record-button" type="button">Start recording</button>
+        </div>
 
         <div class="hero-actions">
           <button id="install-button" class="secondary-button" hidden>Install App</button>
-          <p id="install-hint" class="install-hint">
-            On Android, you can install this from Chrome using the browser menu.
-          </p>
         </div>
       </section>
 
@@ -78,7 +74,6 @@
         </form>
 
         <div class="recorder-actions">
-          <button id="record-button" class="record-button" type="button">Start recording</button>
           <button id="discard-button" class="ghost-button" type="button" disabled>Discard take</button>
         </div>
 
@@ -89,10 +84,7 @@
 
       <section class="panel library-panel">
         <div class="panel-header">
-          <div>
-            <p class="panel-kicker">Your inbox</p>
-            <h2>Saved melody notes</h2>
-          </div>
+          <p class="panel-kicker">Your inbox</p>
           <input id="search-input" class="search-input" type="search" placeholder="Search title, tags, notes, or pitch..." />
         </div>
 

@@ -75,7 +75,15 @@ textarea {
 }
 
 .hero {
-  padding: 1.5rem 0 1.25rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.hero-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .eyebrow,
@@ -89,25 +97,9 @@ textarea {
   font-weight: 700;
 }
 
-.hero h1,
-.panel-header h2,
 .empty-state h3,
 .entry-title {
   font-family: var(--font-display);
-}
-
-.hero h1 {
-  margin: 0.35rem 0 0.75rem;
-  font-size: clamp(2.2rem, 5vw, 4.3rem);
-  line-height: 0.96;
-  max-width: 12ch;
-}
-
-.hero-copy {
-  max-width: 52rem;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: var(--muted);
 }
 
 .hero-actions {
@@ -115,6 +107,7 @@ textarea {
   gap: 0.85rem;
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
 
 .install-hint,
@@ -140,13 +133,8 @@ textarea {
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  align-items: start;
+  align-items: center;
   margin-bottom: 1rem;
-}
-
-.panel-header h2 {
-  margin: 0.2rem 0 0;
-  font-size: clamp(1.45rem, 3vw, 2rem);
 }
 
 .status-pill {
@@ -270,6 +258,15 @@ textarea {
   white-space: nowrap;
 }
 
+.rest-chip {
+  background: rgba(113, 93, 77, 0.08);
+  color: var(--muted);
+}
+
+.rest-chip::before {
+  background: linear-gradient(90deg, rgba(113, 93, 77, 0.12), rgba(113, 93, 77, 0.2));
+}
+
 .capture-form {
   display: grid;
   gap: 0.9rem;
@@ -334,6 +331,10 @@ textarea {
   background: linear-gradient(135deg, var(--accent), #ff8b4a);
   color: white;
   box-shadow: 0 10px 26px rgba(240, 93, 35, 0.3);
+}
+
+.hero-record-button {
+  min-width: 11rem;
 }
 
 .secondary-button {
@@ -429,8 +430,12 @@ textarea {
     padding-bottom: 2rem;
   }
 
-  .hero h1 {
-    max-width: 9ch;
+  .hero-topline {
+    align-items: stretch;
+  }
+
+  .hero-record-button {
+    width: 100%;
   }
 
   .panel {
