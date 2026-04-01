@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f05d23" />
+    <title>HumNote</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css?v=2" />
+  </head>
+  <body>
+    <div class="background-glow background-glow-one"></div>
+    <div class="background-glow background-glow-two"></div>
+
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">HumNote</p>
+        <h1>Capture melody ideas before they disappear.</h1>
+        <p class="hero-copy">
+          Hum, whistle, or sing into your phone. HumNote records the audio, sketches the notes, and keeps each melody idea in a searchable inbox.
+        </p>
+
+        <div class="hero-actions">
+          <button id="install-button" class="secondary-button" hidden>Install App</button>
+          <p id="install-hint" class="install-hint">
+            On Android, you can install this from Chrome using the browser menu.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel recorder-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Quick capture</p>
+            <h2>Melody Recorder</h2>
+          </div>
+          <div id="status-pill" class="status-pill idle">Ready</div>
+        </div>
+
+        <div class="visualizer-card">
+          <div class="meter-row">
+            <span>Pitch</span>
+            <strong id="live-note">Listening...</strong>
+          </div>
+          <div class="wave-meter">
+            <div id="meter-fill" class="meter-fill"></div>
+          </div>
+          <p id="live-frequency" class="supporting-copy">Give microphone permission to start capturing melody.</p>
+        </div>
+
+        <div class="note-strip">
+          <p class="strip-label">Detected phrase</p>
+          <div id="live-phrase" class="phrase-track">No phrase yet.</div>
+        </div>
+
+        <form id="capture-form" class="capture-form">
+          <label>
+            <span>Title</span>
+            <input id="title-input" name="title" type="text" maxlength="80" placeholder="Late night chorus idea" />
+          </label>
+
+          <label>
+            <span>Tags</span>
+            <input id="tags-input" name="tags" type="text" maxlength="120" placeholder="dreamy, guitar, bridge" />
+          </label>
+
+          <label>
+            <span>Context</span>
+            <textarea
+              id="notes-input"
+              name="notes"
+              rows="3"
+              maxlength="400"
+              placeholder="Optional note about what this melody is for."
+            ></textarea>
+          </label>
+        </form>
+
+        <div class="recorder-actions">
+          <button id="record-button" class="record-button" type="button">Start recording</button>
+          <button id="discard-button" class="ghost-button" type="button" disabled>Discard take</button>
+        </div>
+
+        <div id="draft-summary" class="draft-summary muted">
+          Record a short idea and HumNote will save both the audio and a melody sketch.
+        </div>
+      </section>
+
+      <section class="panel library-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Your inbox</p>
+            <h2>Saved melody notes</h2>
+          </div>
+          <input id="search-input" class="search-input" type="search" placeholder="Search title, tags, notes, or pitch..." />
+        </div>
+
+        <div id="empty-state" class="empty-state">
+          <h3>No melody notes yet</h3>
+          <p>Your saved ideas will show up here with playback, note sketches, and tags.</p>
+        </div>
+
+        <div id="library-list" class="library-list"></div>
+      </section>
+    </main>
+
+    <template id="entry-template">
+      <article class="entry-card">
+        <div class="entry-topline">
+          <div>
+            <h3 class="entry-title"></h3>
+            <p class="entry-date"></p>
+          </div>
+          <button class="ghost-button entry-delete" type="button">Delete</button>
+        </div>
+
+        <p class="entry-tags"></p>
+        <p class="entry-notes"></p>
+        <div class="entry-melody"></div>
+        <div class="entry-actions">
+          <button class="secondary-button play-audio" type="button">Play recording</button>
+          <button class="secondary-button play-melody" type="button">Play melody</button>
+        </div>
+        <audio class="entry-audio" controls preload="metadata"></audio>
+      </article>
+    </template>
+
+    <script type="module" src="/app.js?v=3"></script>
+  </body>
+</html>

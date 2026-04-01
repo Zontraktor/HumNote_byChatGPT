@@ -1,0 +1,23 @@
+{
+  "name": "HumNote",
+  "short_name": "HumNote",
+  "description": "Capture melody ideas by humming, whistling, or singing into your phone.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff9f1",
+  "theme_color": "#f05d23",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
