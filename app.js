@@ -8,11 +8,12 @@ const MIN_PITCH_HZ = 45;
 const MAX_PITCH_HZ = 700;
 const STABLE_NOTE_WINDOW = 3;
 const RECORDING_PREROLL_MS = 100;
-const MAX_NOTE_GAP_MS = 140;
+const MAX_NOTE_GAP_MS = 90;
 const MIN_NOTE_DURATION_MS = 180;
 const SEMITONE_STICKINESS = 1;
 const MAX_NOTE_JUMP_SEMITONES = 7;
 const HARMONIC_CORRELATION_RATIO = 0.92;
+const MIN_REST_DURATION_MS = 45;
 
 const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -582,7 +583,7 @@ function summariseMelody(frames) {
 
       phrase.push({
         type: "rest",
-        durationMs: gapMs - frameSpan
+        durationMs: Math.max(MIN_REST_DURATION_MS, gapMs - frameSpan)
       });
 
       current = null;
@@ -621,7 +622,7 @@ function summariseMelody(frames) {
       .filter((item) => item.type === "rest" || item.durationMs >= MIN_NOTE_DURATION_MS)
       .reduce((accumulator, item) => {
       if (item.type === "rest") {
-        if (item.durationMs >= 80) {
+        if (item.durationMs >= MIN_REST_DURATION_MS) {
           const previous = accumulator.at(-1);
           if (previous?.type === "rest") {
             previous.durationMs += item.durationMs;

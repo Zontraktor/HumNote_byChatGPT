@@ -79,11 +79,9 @@ textarea {
 }
 
 .hero-topline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  justify-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
 .eyebrow,
@@ -431,7 +429,7 @@ textarea {
   }
 
   .hero-topline {
-    align-items: stretch;
+    justify-items: stretch;
   }
 
   .hero-record-button {
