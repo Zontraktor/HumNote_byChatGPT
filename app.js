@@ -879,7 +879,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js");
+    await navigator.serviceWorker.register("./sw.js");
   } catch (error) {
     console.warn("Service worker registration failed", error);
   }

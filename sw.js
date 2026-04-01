@@ -1,12 +1,12 @@
 const CACHE_NAME = "humnote-v2";
 const ASSETS = [
-  "/",
-  "/index.html",
-  "/styles.css?v=2",
-  "/app.js?v=3",
-  "/manifest.webmanifest",
-  "/icon.svg",
-  "/icon-maskable.svg"
+  "./",
+  "./index.html",
+  "./styles.css?v=2",
+  "./app.js?v=3",
+  "./manifest.webmanifest",
+  "./icon.svg",
+  "./icon-maskable.svg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -44,7 +44,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match("/index.html"));
+        .catch(() => caches.match("./index.html"));
     })
   );
 });
